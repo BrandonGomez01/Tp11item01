@@ -1,89 +1,101 @@
- <!DOCTYPE html>
+ Disculpa el corte anterior. Aquí te dejo el código completo:
+
+```
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ábaco de Smith - Adaptación de Impedancia</title>
-    <script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #smithChart {
-            width: 100%;
-            max-width: 800px;
-            height: 600px;
-            margin: auto;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ábaco de Smith - Adaptación de Impedancia</title>
+  <script src="(link unavailable)"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #smithChart {
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      margin: auto;
+    }
+  </style>
 </head>
 <body>
-    <h1>Ábaco de Smith - Adaptación de Impedancia</h1>
-    <p><b>Problema:</b> Diseñar una línea de transmisión con \( Z_0 = 50 \, \Omega \) y \( Z_R = 70 \, \Omega \) para una ROE de 1.4.</p>
-    <form id="inputForm">
-        <label for="z0">Impedancia Característica (\(Z_0\)) [Ω]:</label>
-        <input type="number" id="z0" value="50" required><br><br>
+  <h1>Ábaco de Smith - Adaptación de Impedancia</h1>
+  <p><b>Problema:</b> Diseñar una línea de transmisión con \( Z_0 = 50 \, \Omega \) y \( Z_R = 70 \, \Omega \) para una ROE de 1.4.</p>
+  <form id="inputForm">
+    <label for="z0">Impedancia Característica (\(Z_0\)) [Ω]:</label>
+    <input type="number" id="z0" value="50" required><br><br>
+    <label for="zr">Impedancia de Carga (\(Z_R\)) [Ω]:</label>
+    <input type="number" id="zr" value="70" required><br><br>
+    <label for="roe">Relación de Ondas Estacionarias (ROE):</label>
+    <input type="number" id="roe" value="1.4" step="0.1" required><br><br>
+    <button type="button" id="calculateButton">Calcular</button>
+  </form>
+  <div id="results"></div>
+  <div id="smithChart"></div>
 
-        <label for="zr">Impedancia de Carga (\(Z_R\)) [Ω]:</label>
-        <input type="number" id="zr" value="70" required><br><br>
+  <script>
+    window.onload = function() {
+      const form = document.getElementById('inputForm');
+      const button = document.getElementById('calculateButton');
+      const z0Input = document.getElementById('z0');
+      const zrInput = document.getElementById('zr');
+      const roeInput = document.getElementById('roe');
 
-        <label for="roe">Relación de Ondas Estacionarias (ROE):</label>
-        <input type="number" id="roe" value="1.4" step="0.1" required><br><br>
+      button.addEventListener('click', calculateStubPosition);
 
-        <button type="button" onclick="calculateStubPosition()">Calcular</button>
-    </form>
+      function calculateStubPosition() {
+        console.log('Calculando posición del stub...');
+        const Z0 = parseFloat(z0Input.value);
+        const ZR = parseFloat(zrInput.value);
+        const ROE = parseFloat(roeInput.value);
 
-    <div id="results"></div>
-    <div id="smithChart"></div>
+        console.log(`Z0: ${Z0}, ZR: ${ZR}, ROE: ${ROE}`);
 
-    <script>
-        function calculateStubPosition() {
-            const Z0 = parseFloat(document.getElementById("z0").value);
-            const ZR = parseFloat(document.getElementById("zr").value);
-            const ROE = parseFloat(document.getElementById("roe").value);
+        // Cálculo del coeficiente de reflexión en magnitud |Γ|
+        const gammaMagnitude = (ROE - 1) / (ROE + 1);
+        console.log(`Gamma Magnitud: ${gammaMagnitude}`);
 
-            // Cálculo del coeficiente de reflexión en magnitud |Γ|
-            const gammaMagnitude = (ROE - 1) / (ROE + 1);
+        // Coeficiente de reflexión Γ (normalizado)
+        const normalizedZR = ZR / Z0;
+        const gamma = (normalizedZR - 1) / (normalizedZR + 1);
 
-            // Coeficiente de reflexión Γ (normalizado)
-            const normalizedZR = ZR / Z0;
-            const gamma = (normalizedZR - 1) / (normalizedZR + 1);
+        // Posición del stub (d) en términos de longitud de onda λ
+        const angleGamma = Math.atan2(0, gamma) * (180 / Math.PI);
+        const d = angleGamma / (4 * 360);
 
-            // Posición del stub (d) en términos de longitud de onda λ
-            const angleGamma = Math.atan2(0, gamma) * (180 / Math.PI); // Ángulo de Γ
-            const d = angleGamma / (4 * 360); // Distancia (λ)
+        // Gráfica en el Ábaco de Smith
+        const smithPoints = [
+          { real: normalizedZR, imag: 0, label: 'Z_R Normalizado' },
+          { real: 1, imag: 0, label: 'Adaptado (Z_0)' },
+        ];
 
-            // Gráfica en el Ábaco de Smith
-            const smithPoints = [
-                { real: gammaMagnitude, i
-                 const smithPoints = [
-                { real: normalizedZR, imag: 0, label: 'Z_R Normalizado' },
-                { real: 1, imag: 0, label: 'Adaptado (Z_0)' },
-            ];
+        const trace = {
+          x: smithPoints.map(p => p.real),
+          y: smithPoints.map(p => p.imag),
+          mode: 'markers+text',
+          text: smithPoints.map(p => p.label),
+          textposition: 'top center',
+          type: 'scatter',
+        };
 
-            const trace = {
-                x: smithPoints.map(p => p.real),
-                y: smithPoints.map(p => p.imag),
-                mode: 'markers+text',
-                text: smithPoints.map(p => p.label),
-                textposition: 'top center',
-                type: 'scatter'
-            };
+        Plotly.newPlot('smithChart', [trace], {
+          title: 'Ábaco de Smith',
+          xaxis: { title: 'Parte Real (Re)' },
+          yaxis: { title: 'Parte Imaginaria (Im)' },
+        });
 
-            Plotly.newPlot('smithChart', [trace], {
-                title: 'Ábaco de Smith',
-                xaxis: { title: 'Parte Real (Re)' },
-                yaxis: { title: 'Parte Imaginaria (Im)' }
-            });
-
-            // Mostrar resultados
-            document.getElementById("results").innerHTML = `
-                <h3>Resultados</h3>
-                <p><b>Coeficiente de Reflexión (|Γ|):</b> ${gammaMagnitude.toFixed(4)}</p>
-                <p><b>Distancia para colocar el stub:</b> ${d.toFixed(4)} λ</p>
-            `;
-        }
-    </script>
+        // Mostrar resultados
+        document.getElementById("results").innerHTML = `
+          <h3>Resultados</h3>
+          <p><b>Coeficiente de Reflexión (|Γ|):</b> ${gammaMagnitude.toFixed(4)}</p>
+          <p><b>Distancia para colocar el stub:</b> ${d.toFixed(4)} λ</p>
+        `;
+      }
+    };
+  </script>
 </body>
 </html>
+```
